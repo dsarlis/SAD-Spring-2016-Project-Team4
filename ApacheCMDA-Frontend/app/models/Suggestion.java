@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by gavin on 11/24/15.
  */
-public class Suggestion {
+public class Suggestion implements Interaction{
     private static final APICallAdapter adapter = APICallAdapter.getAPICallAdapter();
     private final static String CREATE_SUGGESTION = Constants.NEW_BACKEND + "suggestion/publishSuggestion";
     private final static String ADD_TAG = Constants.NEW_BACKEND + "suggestion/addTag";
@@ -43,7 +43,8 @@ public class Suggestion {
         if (node.get("suggestionVotes")!=null) sVote = node.get("suggestionVotes").asInt();
     }
 
-    public static JsonNode createSuggestion(ObjectNode node) {
+    @Override
+    public  JsonNode create(ObjectNode node) {
         JsonNode response = adapter.postAPI(CREATE_SUGGESTION, node);
         return response;
     }

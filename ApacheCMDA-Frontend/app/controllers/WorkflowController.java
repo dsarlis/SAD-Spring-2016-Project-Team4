@@ -70,7 +70,9 @@ public class WorkflowController extends Controller {
             flash("error", "Form value invalid");
         }
 
-        JsonNode commentResponse = Comment.create(jnode);
+        InteractionMaker interactionMaker=new InteractionMaker(jnode);
+        JsonNode commentResponse = interactionMaker.createComment();
+
         if (commentResponse == null || commentResponse.has("error")) {
             //Logger.debug("Create Failed!");
             if (commentResponse == null) flash("error", "Create Comment error.");
@@ -95,7 +97,9 @@ public class WorkflowController extends Controller {
             flash("error", "Form value invalid");
         }
 
-        JsonNode replyResponse = Reply.create(jnode);
+        InteractionMaker interactionMaker=new InteractionMaker(jnode);
+        JsonNode replyResponse = interactionMaker.createReply();
+
         if (replyResponse == null || replyResponse.has("error")) {
             if (replyResponse == null) flash("error", "Create Reply error.");
             else flash("error", replyResponse.get("error").textValue());
@@ -364,7 +368,9 @@ public class WorkflowController extends Controller {
         }catch(Exception e) {
             flash("error", "Form value invalid");
         }
-        JsonNode addSgstResponse = Suggestion.createSuggestion(jnode);
+        InteractionMaker interactionMaker=new InteractionMaker(jnode);
+        JsonNode addSgstResponse = interactionMaker.createSuggestion();
+
 
         if (addSgstResponse == null || addSgstResponse.has("error")) {
             if (addSgstResponse == null) flash("error", "Create suggestion error.");

@@ -8,7 +8,7 @@ import util.Constants;
 /**
  * Created by chenlinquan on 12/4/15.
  */
-public class Reply {
+public class Reply implements Interaction{
     private static final APICallAdapter adapter = APICallAdapter.getAPICallAdapter();
     private final static String CREATE = Constants.NEW_BACKEND + "Comment/addReply";
     private final static String CREATE_REPLY = Constants.NEW_BACKEND + "Comment/replyReply";
@@ -41,7 +41,8 @@ public class Reply {
         }
     }
 
-    public static JsonNode create(ObjectNode node) {
+    @Override
+    public JsonNode create(ObjectNode node) {
         JsonNode response = adapter.postAPI(CREATE, node);
         return response;
     }

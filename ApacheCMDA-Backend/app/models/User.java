@@ -32,6 +32,10 @@ public class User implements Comparable{
 	private String phoneNumber;
 	private String avatar;
 
+	@OneToMany(fetch = FetchType.EAGER,cascade=CascadeType.ALL)
+	@JoinColumn(name = "senderGroupId", referencedColumnName = "id")
+	protected Set<GroupRequestor> joinGroupRequestSender;
+
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(	name = "Followers",
 				joinColumns = { @JoinColumn(name ="userId", referencedColumnName = "id")},
@@ -154,6 +158,15 @@ public class User implements Comparable{
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
 	}
+
+	public Set<GroupRequestor> getJoinGroupRequestSender() {
+		return joinGroupRequestSender;
+	}
+
+	public void setJoinGroupRequestSender(Set<GroupRequestor> joinGroupRequestSender) {
+		this.joinGroupRequestSender = joinGroupRequestSender;
+	}
+
 
 	@Override
 	public int compareTo(Object o) {

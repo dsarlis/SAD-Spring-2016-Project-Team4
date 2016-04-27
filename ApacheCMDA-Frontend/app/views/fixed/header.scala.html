@@ -30,15 +30,13 @@
                     <div class="reddot hide"></div>
                 </li>
                 <li><a href="/workflow/getPublicWorkflow">Forum</a></li>
-            }
+                <li><a href="/group">Group</a></li>}
             </ul>
             <ul class="nav navbar-nav navbar-right">
             @if(username != "undefined") {
                 <li class="dropdown">
                     <a href="#" id="currentuser" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">@username <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="/group/create">Create Group</a ></li>
-                        <li><a href="/group/join">Join Group</a ></li>
                         <li><a href="/profile/@sessionUser">Profile</a></li>
                         <li><a href="/logout">Logout</a ></li>
                     </ul>

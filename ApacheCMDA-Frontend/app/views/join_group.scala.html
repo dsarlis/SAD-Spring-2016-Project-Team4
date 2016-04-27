@@ -23,8 +23,16 @@
                 }
             </div>
             <div>
+                <h2>Groups Center</h2>
+                <hr>
+                <div class="row">
+                    <a href="/group/create" class="btn btn-primary">Create New Group</a>
+                    <a href="/group/join" class="btn btn-primary">Join Group</a>
+                </div>
+            </div>
+            <div>
                 <h3>Join group</h3>
-                <form action="@routes.GroupController.joinGroup()" method="POST">
+                <form action="@routes.GroupController.joinGroupRequest()" method="POST">
                     <input type="hidden" name="userID" value="@userId">
                     <input type="text" name="groupUrl" placeholder="pass code">
                     <button type="submit">Join</button>

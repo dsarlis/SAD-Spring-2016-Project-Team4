@@ -84,6 +84,11 @@ POST        /group/creategroup                                  controllers.Grou
 GET         /group/join                                         controllers.GroupController.join()
 POST        /group/joingroup                                    controllers.GroupController.joinGroup()
 
+# join group
+GET         /group                                              controllers.GroupController.main()
+POST        /group/joingrouprequest                             controllers.GroupController.joinGroupRequest()
+GET         /group/accept/:groupUrl/:id                         controllers.GroupController.acceptMember(groupUrl:String, id: Long)
+GET         /group/reject/:groupUrl/:id                         controllers.GroupController.rejectMember(groupUrl:String, id: Long)
 
 # notifications
 GET         /notifications                                      controllers.NotificationController.main()

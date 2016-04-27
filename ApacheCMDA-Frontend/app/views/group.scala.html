@@ -1,0 +1,52 @@
+@(userName: String, userId: Long,req: Map[String,List[User]])
+<!doctype html>
+<html>
+<head>
+    <link href='@routes.Assets.at("css/bootstrap.min.css")'
+          rel="stylesheet"/>
+    <link href='@routes.Assets.at("css/header.css")'
+          rel="stylesheet"/>
+
+    <script src='@routes.Assets.at("js/jquery-1.1.js")'></script>
+</head>
+<body>
+<div id="header">
+    @fixed.header(userName, userId, userId)
+</div>
+<div class="container">
+    <h2>Groups Center</h2>
+    <hr>
+    <div class="row">
+        <a href="/group/create" class="btn btn-primary">Create New Group</a>
+        <a href="/group/join" class="btn btn-primary">Join Group</a>
+    </div>
+    <h3>Join Group Request</h3>
+    @if(req.isEmpty) {
+        <p>You don't have a new request for joining your groups.</p>
+    } else {
+        @if(!req.isEmpty) {
+            <hr>
+            @for( (k,v) <-req){
+            <h3>GroupUrl: @k</h3>
+                <table class="table">
+                    <tr><th>User</th><th>Email</th><th>Action</th></tr>
+                    @for( result <- v) {
+                        <tr>
+                            <td>@result.getUserName</td>
+                            <td>@result.getEmail</td>
+                            <td><a href="/group/accept/@k/@result.getId">Accept</a> <a href="/group/reject/@k/@result.getId">Reject</a></td>
+                        </tr>
+                    }
+                </table>
+            }
+
+        }
+    }
+</div>
+</body>
+</html>
+
+
+
+
+

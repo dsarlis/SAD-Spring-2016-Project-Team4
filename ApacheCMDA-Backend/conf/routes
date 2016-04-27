@@ -113,6 +113,14 @@ GET            /group/getGroupList/:userID/json                                 
 GET            /group/getGroupMember/:groupId/json 	                                                     @controllers.GroupUsersController.getGroupMember(groupId: Long, format: String="json")
 
 
+
+#Join Group
+POST           /group/sendJoinRequest                                                                    @controllers.GroupUsersController.sendJoinRequest
+GET            /group/getJoinGroupRequests/userId/:userId                                                @controllers.GroupUsersController.getJoinGroupRequests(userId: Long)
+GET            /group/acceptJoinRequest/groupUrl/:groupUrl/userId/:userId/sender/:senderId               @controllers.GroupUsersController.acceptJoinRequest(groupUrl:String,userId:Long, senderId:Long)
+GET            /group/rejectJoinRequest/groupUrl/:groupUrl/userId/:userId/sender/:senderId               @controllers.GroupUsersController.rejectJoinRequest(groupUrl:String,userId: Long, senderId: Long)
+
+
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                                                             controllers.Assets.at(path="/", file)
 
