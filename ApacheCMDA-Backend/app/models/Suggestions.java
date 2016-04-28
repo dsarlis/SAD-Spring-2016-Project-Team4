@@ -18,6 +18,7 @@ package models;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Entity
@@ -25,10 +26,14 @@ public class Suggestions {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
-    private long suggestionCreator;
+	private long suggestionCreator;
 	private String suggestionContent;
+	private TagMemonto newMemonto = new TagMemonto();
+
+	private ArrayList<Tag> suggestionTags;
 	private String suggestionTag;
 	private int suggestionVotes;
+
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
 	@JoinTable(name = "SuggestionsAndWorkflows", joinColumns = { @JoinColumn(name ="suggestionId", referencedColumnName = "id")}, inverseJoinColumns = { @JoinColumn(name = "workflowId", referencedColumnName = "id") })
@@ -39,13 +44,15 @@ public class Suggestions {
 
 	public Suggestions(long suggestionCreator, String suggestionContent, List<Workflow> suggestionWorkflows) {
 		super();
-        this.suggestionCreator = suggestionCreator;
+		this.suggestionCreator = suggestionCreator;
 		this.suggestionContent = suggestionContent;
 		this.suggestionWorkflows = suggestionWorkflows;
+		this.suggestionTags = new ArrayList<Tag>();
+		this.suggestionTag = "";
 		this.suggestionVotes = 0;
 	}
 
-    public long getId() {return id;}
+	public long getId() {return id;}
 
 	public List<Workflow> getSuggestionWorkflows() {
 		return suggestionWorkflows;
@@ -64,11 +71,21 @@ public class Suggestions {
 	}
 
 	public String getSuggestionTag() {
+		String e = "";
+		for (int i = 0;i < suggestionTags.size() - 1;i++)
+			e+= suggestionTags.get(i) + "|";
+		if (e.length() > 0)
+			e = e.substring(0, e.length() - 1);
 		return suggestionTag;
 	}
 
-	public void setSuggestionTag(String suggestionTag) {
-		this.suggestionTag = suggestionTag;
+	public void setSuggestionTag(String suggestionTags2) {
+		String [] tottags = suggestionTags2.split("\\|");
+		for (int i = 0; i < tottags.length; i++)
+			System.out.println(tottags[i]);
+		this.suggestionTags.add(new Tag(tottags[tottags.length - 1]));
+		this.suggestionTag = suggestionTags2;
+		newMemonto.addMemontos(tottags[tottags.length - 1]);
 	}
 
 	public String getSuggestionContent() {
