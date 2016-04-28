@@ -7,6 +7,7 @@ import models.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -16,6 +17,7 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.APICall;
 import util.APICallAdapter;
 import util.Constants;
 import views.html.forum;
@@ -27,13 +29,16 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.*;
 
 public class WorkflowController extends Controller {
-        private static final APICallAdapter adapter = APICallAdapter.getAPICallAdapter();
+    private static final APICallAdapter adapter = APICallAdapter.getAPICallAdapter();
     final static Form<Workflow> f_wf = Form.form(Workflow.class);
     final static Form<Comment> f_comment = Form.form(Comment.class);
     final static Form<Reply> f_reply = Form.form(Reply.class);
@@ -72,7 +77,6 @@ public class WorkflowController extends Controller {
 
         InteractionMaker interactionMaker=new InteractionMaker(jnode);
         JsonNode commentResponse = interactionMaker.createComment();
-
         if (commentResponse == null || commentResponse.has("error")) {
             //Logger.debug("Create Failed!");
             if (commentResponse == null) flash("error", "Create Comment error.");
@@ -99,7 +103,6 @@ public class WorkflowController extends Controller {
 
         InteractionMaker interactionMaker=new InteractionMaker(jnode);
         JsonNode replyResponse = interactionMaker.createReply();
-
         if (replyResponse == null || replyResponse.has("error")) {
             if (replyResponse == null) flash("error", "Create Reply error.");
             else flash("error", replyResponse.get("error").textValue());
@@ -157,38 +160,42 @@ public class WorkflowController extends Controller {
             flash("error", "The workflow is protected!");
             return redirect(routes.WorkflowController.main());
         }
+
         Workflow wf = new Workflow(wfres);
 
-        JsonNode commentList = adapter.callAPI(Constants.NEW_BACKEND + "workflow/getComments/"
-                + wid.toString());
+        List<Comment> commentList = WorkflowBuilderComment.getWorkflowComment(wid);
+        List<Suggestion> suggestionList = WorkflowBuilderSuggestion.getWorkflowSuggestion(wid);
 
-        List<Comment> commentRes = new ArrayList<>();
-        List<List<Reply>> replyRes = new ArrayList<>();
+        List<List<Reply>> replyRes = WorkflowBuilderComment.getWorkflowReply(wid);
 
-        for (int i = 0; i < commentList.size(); i++) {
-            JsonNode node = commentList.get(i);
-            Comment comment = new Comment(node);
-            commentRes.add(comment);
-            Long commentId = comment.getId();
-            JsonNode replyList = adapter.callAPI(Constants.NEW_BACKEND + "Comment/getReply/"
-                    + commentId.toString());
-            List<Reply> listReply = new ArrayList<>();
-            for (int j = 0; j < replyList.size(); j++) {
-                JsonNode rNode = replyList.get(j);
-                Reply reply = new Reply(rNode);
-                listReply.add(reply);
-            }
-            replyRes.add(listReply);
-        }
+//        List<Comment> commentRes = new ArrayList<>();
+//        JsonNode commentNode = APICall.callAPI(Constants.NEW_BACKEND + "workflow/getComments/" + wid.toString());
+//        List<List<Reply>> replyRes = new ArrayList<>();
+//
+//        for (int i = 0; i < commentNode.size(); i++) {
+//            JsonNode node = commentNode.get(i);
+//            Comment comment = new Comment(node);
+//            commentList.add(comment);
+//            Long commentId = comment.getId();
+//            JsonNode replyList = APICall.callAPI(Constants.NEW_BACKEND + "Comment/getReply/"
+//                    + commentId.toString());
+//            List<Reply> listReply = new ArrayList<>();
+//            for (int j = 0; j < replyList.size(); j++) {
+//                JsonNode rNode = replyList.get(j);
+//                Reply reply = new Reply(rNode);
+//                listReply.add(reply);
+//            }
+//            replyRes.add(listReply);
+//        }
 
-        JsonNode suggetionNode = adapter.callAPI(Constants.NEW_BACKEND + "suggestion/getSuggestionForWorkflow/" + wid.toString());
-        List<Suggestion> suggestionList = new ArrayList<>();
-        for (JsonNode n: suggetionNode) {
-            Suggestion cur = new Suggestion(n);
-            suggestionList.add(cur);
-        }
+//        JsonNode suggetionNode = APICall.callAPI(Constants.NEW_BACKEND + "suggestion/getSuggestionForWorkflow/" + wid.toString());
+//        List<Suggestion> suggestionList = new ArrayList<>();
+//        for (JsonNode n: suggetionNode) {
+//            Suggestion cur = new Suggestion(n);
+//            suggestionList.add(cur);
+//        }
 
-        return ok(workflowdetail.render(wf, commentRes, replyRes, suggestionList, session("username"), Long.parseLong(session("id"))));
+        return ok(workflowdetail.render(wf, commentList, replyRes,  suggestionList, session("username"), Long.parseLong(session("id"))));
     }
 
     public static Result edit(Long wid)
@@ -370,7 +377,6 @@ public class WorkflowController extends Controller {
         }
         InteractionMaker interactionMaker=new InteractionMaker(jnode);
         JsonNode addSgstResponse = interactionMaker.createSuggestion();
-
 
         if (addSgstResponse == null || addSgstResponse.has("error")) {
             if (addSgstResponse == null) flash("error", "Create suggestion error.");

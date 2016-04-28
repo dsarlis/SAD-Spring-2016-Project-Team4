@@ -1,26 +1,28 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.JsonNode;
-import models.User;
+import models.SearchResult;
 import models.Workflow;
-import play.mvc.Controller;
+import play.api.mvc.*;
 import play.mvc.Result;
+import util.APICall;
 import util.APICallAdapter;
 import util.Constants;
-import views.html.profile;
-
+import views.html.*;
+import play.mvc.Controller;
 import java.util.ArrayList;
 import java.util.List;
+import models.User;
 
 /**
  * Created by gavin on 11/19/15.
  */
 public class ProfileController extends Controller {
     private static final APICallAdapter adapter = APICallAdapter.getAPICallAdapter();
-
-    private static enum FollowType {
-        FOLLOWEE, FOLLOWER
-    }
+//    private static enum FollowType {
+//        FOLLOWEE, FOLLOWER
+//    }
 
     public static boolean notpass() {
         if (session("id") == null) {
@@ -29,47 +31,48 @@ public class ProfileController extends Controller {
         return false;
     }
 
-    private static List<User> getFollow(Long id, FollowType f) {
-        String queryApi = Constants.NEW_BACKEND
-                + (f == FollowType.FOLLOWEE ? "users/getFollowees/" : "users/getFollowers/")
-                + id.toString();
-        JsonNode response = adapter.callAPI(queryApi);
-        if (response.has("error"))
-            return new ArrayList<User>();
-        List<User> result = new ArrayList<User>();
-        String key = (f == FollowType.FOLLOWEE ? "followees" : "followers");
-        JsonNode arr = response.get(key);
-        for (JsonNode entity: arr) {
-            User u = new User();
-            JsonNode user = entity.get("User");
-            u.setId(Long.parseLong(user.get("id").textValue()));
-            u.setUserName(user.get("userName").textValue());
-            u.setEmail(user.get("email").textValue());
-            u.setAvatar(user.get("avatar").textValue());
-            result.add(u);
-        }
-        return result;
-    }
 
-    private static List<User> getFriends(Long id)
-    {
-        String queryApi = Constants.NEW_BACKEND
-                + "users/getFriends/userId/" + id.toString();
-        JsonNode response = adapter.callAPI(queryApi);
-        if (response.has("error"))
-            return new ArrayList<User>();
-        List<User> result = new ArrayList<User>();
-        if (response.get("friends")==null) return result;
-        for (JsonNode entityn: response.get("friends")) {
-            JsonNode entity = entityn.get("User");
-            User u = new User();
-            u.setId(Long.parseLong(entity.get("id").textValue()));
-            u.setUserName(entity.get("userName").textValue());
-            u.setAvatar(entity.get("avatar").textValue());
-            result.add(u);
-        }
-        return result;
-    }
+//    private static List<User> getFollow(Long id, FollowType f) {
+//        String queryApi = Constants.NEW_BACKEND
+//                + (f == FollowType.FOLLOWEE ? "users/getFollowees/" : "users/getFollowers/")
+//                + id.toString();
+//        JsonNode response = APICall.callAPI(queryApi);
+//        if (response.has("error"))
+//            return new ArrayList<User>();
+//        List<User> result = new ArrayList<User>();
+//        String key = (f == FollowType.FOLLOWEE ? "followees" : "followers");
+//        JsonNode arr = response.get(key);
+//        for (JsonNode entity: arr) {
+//            User u = new User();
+//            JsonNode user = entity.get("User");
+//            u.setId(Long.parseLong(user.get("id").textValue()));
+//            u.setUserName(user.get("userName").textValue());
+//            u.setEmail(user.get("email").textValue());
+//            u.setAvatar(user.get("avatar").textValue());
+//            result.add(u);
+//        }
+//        return result;
+//    }
+//
+//    private static List<User> getFriends(Long id)
+//    {
+//        String queryApi = Constants.NEW_BACKEND
+//                + "users/getFriends/userId/" + id.toString();
+//        JsonNode response = APICall.callAPI(queryApi);
+//        if (response.has("error"))
+//            return new ArrayList<User>();
+//        List<User> result = new ArrayList<User>();
+//        if (response.get("friends")==null) return result;
+//        for (JsonNode entityn: response.get("friends")) {
+//            JsonNode entity = entityn.get("User");
+//            User u = new User();
+//            u.setId(Long.parseLong(entity.get("id").textValue()));
+//            u.setUserName(entity.get("userName").textValue());
+//            u.setAvatar(entity.get("avatar").textValue());
+//            result.add(u);
+//        }
+//        return result;
+//    }
 
     public static Result profile(Long id) {
         if (notpass()) return redirect(routes.Application.login());
@@ -93,10 +96,19 @@ public class ProfileController extends Controller {
         user.setId(res_id);
         user.setAvatar(response.get("avatar").textValue());
 
-        List<User> followers = ProfileController.getFollow(id, FollowType.FOLLOWER);
-        List<User> followees = ProfileController.getFollow(id, FollowType.FOLLOWEE);
+        ProfileFactory profileFactory = new ProfileFactory();
 
-        List<User> myfriends = ProfileController.getFriends(Long.parseLong(session("id")));
+        ProfileInterface profileFriend = profileFactory.getProfile("friend");
+        List<User> myfriends = profileFriend.getFriends(Long.parseLong(session("id")));
+
+        ProfileInterface profileFollow = profileFactory.getProfile("follow");
+        List<User> followers = profileFollow.getFollow(id, ProfileInterface.FollowType.FOLLOWER);
+        List<User> followees = profileFollow.getFollow(id, ProfileInterface.FollowType.FOLLOWEE);
+
+//        List<User> followers = ProfileController.getFollow(id, FollowType.FOLLOWER);
+//        List<User> followees = ProfileController.getFollow(id, FollowType.FOLLOWEE);
+//
+//        List<User> myfriends = ProfileController.getFriends(Long.parseLong(session("id")));
         boolean isFriend = false;
         for (User entry : myfriends)
         {
